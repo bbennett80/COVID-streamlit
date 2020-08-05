@@ -4,7 +4,6 @@ import altair as alt
 import webbrowser
 
 
-
 # import chime
 
 st.title('California SARS-CoV2 tracking project')
@@ -15,6 +14,7 @@ st.title('California SARS-CoV2 tracking project')
 cases_url = 'https://data.ca.gov/dataset/590188d5-8545-4c93-a9a0-e230f0db7290/resource/926fd08f-cc91-4828-af38-bd45de97f8c3/download/statewide_cases.csv'
 hospital_url = 'https://data.ca.gov/dataset/529ac907-6ba1-4cb7-9aae-8966fc96aeef/resource/42d33765-20fd-44b8-a978-b083b7542225/download/hospitals_by_county.csv'
 facility_beds = 'https://data.chhs.ca.gov/dataset/09b8ad0e-aca6-4147-b78d-bdaad872f30b/resource/0997fa8e-ef7c-43f2-8b9a-94672935fa60/download/healthcare_facility_beds.xlsx'
+pop_ca = 'https://www.california-demographics.com/counties_by_population'
 
 
 # county selection list
@@ -39,6 +39,16 @@ def cases():
     county_cases_data = data_cases.loc[county_cases]
     return county_cases_data
 
+@st.cache
+def ca_county_pop():
+    ca_pop_county = pd.read_html(pop_ca)
+    table = ca_pop_county[0]
+    county = table.County.str.replace(' County', '')
+    pop = table.Population
+    frames = [county, pop]
+    data = pd.concat(frames, axis=1)
+    filt = data.loc[data.County == county_select]
+    return int(filt.Population)
 
 @st.cache
 def hospital():
@@ -87,12 +97,6 @@ def icu():
     )
 
 
-
-
-
-
-
-
 # def icu_county():
 #     data_beds = pd.read_excel(facility_beds)
 #     icu_cap_county = sorted(data_beds.COUNTY_NAME.unique())
@@ -121,6 +125,10 @@ if hosptial_data:
     st.subheader('Raw data')
     st.write(hospital())
 
+population_data = st.sidebar.checkbox('Show population data')
+if population_data:
+    st.write(f'{county_select} County has a population of {ca_county_pop()} in 2019 according to www.census.gov')
+
 
 # sidebar buttons for external sites
 divoc = 'https://91-divoc.com/pages/covid-visualization/?chart=countries&highlight=United%20States&show=highlight-only&y=both&scale=linear&data=cases-daily-7&data-source=jhu&xaxis=left&extraData=deaths-daily-7&extraDataScale=separately#countries'
@@ -130,9 +138,13 @@ if st.sidebar.button('91-DIVOC'):
     webbrowser.open_new_tab(divoc)
 
 if st.sidebar.button('CHIME'):
-    webbrowser.open_new_tab(divoc)
+    webbrowser.open_new_tab(chime)
 
 # display charts
+new_per_14_days = cases().newcountconfirmed[-14:].sum()
+pop_x = ca_county_pop()/100000
+running_per_pop = round(new_per_14_days/pop_x)
+st.write(f'There have been **{new_per_14_days}** new confirmed cases in **{county_select} County** over the last two weeks with **{running_per_pop}** new cases per 100,000 county residents.')
 st.write(cases_chart())
 st.write(hospital_chart())
 st.write(cfr_chart())
