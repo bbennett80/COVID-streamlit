@@ -4,7 +4,7 @@ import altair as alt
 import webbrowser
 
 
-# import chime
+# todo: add chime model with auto populate
 
 st.title('California SARS-CoV2 tracking project')
 
@@ -95,21 +95,6 @@ def icu():
         .properties(title='ICU beds available', width=1000,height=400)
         .interactive()
     )
-
-
-# def icu_county():
-#     data_beds = pd.read_excel(facility_beds)
-#     icu_cap_county = sorted(data_beds.COUNTY_NAME.unique())
-#     return icu_cap_county
-# icu_select = st.selectbox('Select ICU', list(icu_county()))
-
-# def icu_beds():
-#     data_beds = pd.read_excel(facility_beds)
-#     beds = data_beds.loc[:, ['FACNAME', 'FAC_FDR', 'BED_CAPACITY_TYPE', 'BED_CAPACITY']].where(data_beds['COUNTY_NAME'] == icu_county()).dropna()
-#     icu_beds = beds.loc[:,:].where(beds['BED_CAPACITY_TYPE'] == 'INTENSIVE CARE').dropna()
-#     icu_beds = icu_beds.BED_CAPACITY.sum()
-#     return icu_beds
-
 
 
 # sidebar items
