@@ -32,8 +32,8 @@ county_select = st.selectbox('Select County', list(county()))
 def cases():
     data_cases = pd.read_csv(cases_url)
     data_cases['date'] = pd.to_datetime(data_cases['date'], format='%Y-%m-%d')
-    data_cases['new_confirmed_cases_rolling_average'] = (data_cases.newcountconfirmed.rolling(14).mean()).round(0)
-    data_cases['new_deaths_rolling_average'] = (data_cases.newcountdeaths.rolling(14).mean()).round(0)
+    data_cases['new_confirmed_cases_rolling_average'] = (data_cases.newcountconfirmed.rolling(running_days).mean()).round(0)
+    data_cases['new_deaths_rolling_average'] = (data_cases.newcountdeaths.rolling(running_days).mean()).round(0)
     data_cases['cfr'] = ((data_cases.loc[:, 'totalcountdeaths']/data_cases.loc[:, 'totalcountconfirmed'])*100).round(2)
     county_cases = (data_cases['county'] == county_select)
     county_cases_data = data_cases.loc[county_cases]
@@ -126,10 +126,11 @@ if st.sidebar.button('CHIME'):
     webbrowser.open_new_tab(chime)
 
 # display charts
-new_per_14_days = cases().newcountconfirmed[-14:].sum()
+running_days = st.slider('Select running days average range', 1, 30, 14)
+new_per_x_days = cases().newcountconfirmed[-running_days:].sum()
 pop_x = ca_county_pop()/100000
-running_per_pop = round(new_per_14_days/pop_x)
-st.write(f'There have been **{new_per_14_days}** new confirmed cases in **{county_select} County** over the last two weeks with **{running_per_pop}** new cases per 100,000 county residents.')
+running_per_pop = round(new_per_x_days/pop_x)
+st.write(f'There have been **{new_per_x_days}** new confirmed cases in **{county_select} County** over the last **{running_days}** days with **{running_per_pop}** new cases per 100,000 county residents.')
 st.write(cases_chart())
 st.write(hospital_chart())
 st.write(cfr_chart())
