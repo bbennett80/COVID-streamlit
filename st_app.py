@@ -135,10 +135,10 @@ hospital_chart = hospital_chart()
 cfr_chart = cfr_chart()
 icu = icu()
 
-st.altair_chart(cases_chart)
-st.altair_chart(hospital_chart)
-st.altair_chart(cfr_chart)
-st.altair_chart(icu)
+st.altair_chart(cases_chart, use_container_width=False)
+st.altair_chart(hospital_chart, use_container_width=False)
+st.altair_chart(cfr_chart, use_container_width=False)
+st.altair_chart(icu, use_container_width=False)
 
 
 
