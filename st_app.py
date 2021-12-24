@@ -29,7 +29,7 @@ running_days = st.slider('Select running days average range', 1, 30, 14)
 
 
 # data functions
-#@st.cache
+@st.cache
 def cases(data_cases):
     data_cases['new_confirmed_cases_rolling_average'] = (data_cases.cases.rolling(running_days).mean()).round(0)
     data_cases['new_deaths_rolling_average'] = (data_cases.reported_deaths.rolling(running_days).mean()).round(0)
@@ -38,12 +38,11 @@ def cases(data_cases):
     return data_cases.loc[county_cases]
 
 
-#@st.cache
+@st.cache
 def hospital_data():
     data_hospital = pd.read_csv(hospital_data_url)
     county_hospital = (data_hospital['county'] == county_select)
-    county_hospital_data = data_hospital.loc[county_hospital]
-    return county_hospital_data
+    return data_hospital.loc[county_hospital]
 
 
 cases_data = cases(data)
@@ -99,21 +98,21 @@ def icu():
 
 
 # sidebar items
-cases_data = st.sidebar.checkbox('Show cases data')
-if cases_data:
+show_cases_data = st.sidebar.checkbox('Show cases data')
+if show_cases_data:
     st.write(cdph_data_url)
-    st.subheader('Raw data')
-    st.write(data)
+    st.subheader('Raw cases data')
+    st.write(cases_data)
 
-hosptial_data = st.sidebar.checkbox('Show hospital data')
-if hosptial_data:
+show_hosptial_data = st.sidebar.checkbox('Show hospital data')
+if show_hosptial_data:
     st.write(hospital_data_url)
-    st.subheader('Raw data')
+    st.subheader('Raw hospital data')
     st.write(hospital_data)
 
-population_data = st.sidebar.checkbox('Show population data')
-if population_data:
-    st.write(f'{county_select} County has a population of {ca_county_pop()}')
+show_population_data = st.sidebar.checkbox('Show population data')
+if show_population_data:
+    st.write(f'{county_select} County has a population of {county_pop:,}')
 
 
 # sidebar buttons for external sites
@@ -127,10 +126,10 @@ if st.sidebar.button('CHIME'):
     webbrowser.open_new_tab(chime)
 
 # display charts
-new_per_x_days = cases_data.reported_cases[-running_days:].sum()
+new_per_x_days = int(cases_data.reported_cases[-running_days:].sum())
 pop_x = county_pop/100000
 running_per_pop = round(new_per_x_days/pop_x)
-st.write(f'There have been **{new_per_x_days}** new confirmed cases in **{county_select} County** over the last **{running_days}** days with **{running_per_pop}** new cases per 100,000 county residents.')
+st.write(f'There have been **{new_per_x_days:,}** new confirmed cases in **{county_select} County** over the last **{running_days}** days with **{running_per_pop}** new cases per 100,000 county residents.')
 cases_chart = cases_chart()
 hospital_chart = hospital_chart()
 cfr_chart = cfr_chart()
